@@ -135,15 +135,15 @@ class GeolocationApi
         $this->cacheAvailable = false;
     }
     
-    public function locateAddress($search)
+    public function locateAddress($search, $options = array())
     {
         $location = null;
         if ($this->cacheAvailable)
         {
             // Check the cache first
             $location = $this->em
-                             ->getRepository('GoogleGeolocationBundle:Location')
-                             ->getCachedAddress($search);
+                ->getRepository('GoogleGeolocationBundle:Location')
+                ->getCachedAddress($search, $options);
         }
 
         if (true === is_null($location))
@@ -151,6 +151,7 @@ class GeolocationApi
             // No cache, Use Google Geolocation API
             $location = new Location();
             $location->setSearch($search);
+            $location->setOptions($options);
 
             $location = $this->geolocate($location);
         }
@@ -211,7 +212,7 @@ class GeolocationApi
         // Check limiting
         if ($this->apiAttemptsAllowed())
         {
-            $response   = $this->request($location->getSearch());
+            $response   = $this->request($location);
             $data       = json_decode($response->getContent(), true);
 
             if (true === $this->cacheAvailable)
@@ -243,15 +244,16 @@ class GeolocationApi
 
     /**
      * Perform Geolocation request with Google Geolocation API.
-     * Searches by address string
+     * Searches by Location
      *
+     * @param   Location    $location   
      * @return  array           cURL response from web service
      */
-    protected function request($search)
+    protected function request($location)
     {
         return $this->browser->get('http://maps.googleapis.com/maps/api/geocode/json?' .
             http_build_query(
-                array('address' => $search, 'sensor' => 'false')
+                array_merge(array('address' => $location->getSearch(), 'sensor' => 'false'), $location->getOptions())
             )
         );
     }

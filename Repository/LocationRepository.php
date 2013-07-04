@@ -12,12 +12,14 @@ use Doctrine\ORM\EntityRepository;
  */
 class LocationRepository extends EntityRepository
 {
-    public function getCachedAddress($search)
+    public function getCachedAddress($search, $options = array())
     {
         $qb = $this->createQueryBuilder('l')
                    ->select('l')
                    ->where('l.search = :search')
+                   ->andWhere('l.options = :options')
                    ->setParameter('search', $search)
+                   ->setParameter('options', json_encode($options))
                    ->setMaxResults(1);
 
         try {

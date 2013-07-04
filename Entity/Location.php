@@ -24,6 +24,11 @@ class Location
     protected $search;
 
     /**
+     * @ORM\Column(type="json_array")
+     */
+    protected $options = array();
+
+    /**
      * @ORM\Column(type="smallint")
      */
     protected $matches;
@@ -291,4 +296,15 @@ class Location
     {
         return $this->status;
     }
+    
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    public function setOptions($options)
+    {
+        $this->options = $options;
+    }
+
 }
